@@ -1,103 +1,148 @@
 /*
-Autor:    Nicol·s David Sabogal Vel·squez
-Programa: GeneraciÛn de un puzzle "quince" Primer acercamiento
-Fecha:    18/12/2020
+Autor:    Nicol√°s David Sabogal Vel√°squez
+Programa: Algoritmo Posibilidad Puzzle Quince
+Fecha:    07/01/2021
 */
 
-//Declaro librerÌas
-#include <iostream> //Imput y Output
-#include <clocale>  //Cambio del localismo para tildes
-#include <cstdlib>  //Uso de rand() y srand()
-#include <ctime>    //Uso de time para generar la semilla
+//---------------------------------Librer√≠as------------------------------------
+#include <iostream>     //Imput y Output
+#include <clocale>      //Cambio del localismo para tildes
+#include <cstdlib>      //Uso de rand() y srand()
+#include <ctime>        //Uso de time para generar la semilla
 
-#define P_MAX 4
+//--------------------------------Constantes------------------------------------
+#define clear() system("CLS")	//limpia la pantalla.
+#define N       4               //Orden del puzzle.
 
-//Evito escribir std:: cada vez
-using namespace std;
+//-----------------------Prototipo de funciones---------------------------------
+void crear(int puzzle[][N]);		//Genera una permutaci√≥n aleatoria con n√∫meros 0-N^2.
+void format(int puzzle[][N]);		//Asigna -1 en todos los elementos de la matriz.
+bool check(int temp,int puzzle[][N]);   //Revisa si un n√∫mero ya est√° en la matriz.
+bool impos(int puzzle[][N]);            //Revisa si es posible resolver la matriz deslizando sus elementos.
+int sacaInver(int puzzle[][N]);         //Cuenta cu√°ntas inversiones hay en la matriz.
+int ceroEnI(int puzzle[][N]);           //Identifica en que fila est√° el cero.
+void mostrar(int puzzle[][N]);		//Imprime la matriz.
 
-//Prototipo funciones
-void format(int puzzle[][P_MAX]);			//Asigna 0 en todos los elementos de la matriz
-void crear(int puzzle[][P_MAX]);			//Genera una permutaciÛn aleatoria
-bool check(int temp,int puzzle[][P_MAX]);   //Revisa si un n˙mero ya est· en la matriz
-void mostrar(int puzzle[][P_MAX]);			//Presenta la matriz
+//-----------------------------------Main---------------------------------------
+using namespace std;                            	//Evita escribir std:: cada vez que se refiere una librer√≠a.
 
 int main(){
-	//Cambio el localismo
-	setlocale(LC_ALL, "spanish");
-	
-	//Semilla pseudoaleatoria
-	srand(time('\0'));
-	
-	char respuesta='s';
-	while(respuesta=='s'){
-		//Borro la pantalla
-		system("CLS");
-		
-		//PresentaciÛn
-		cout <<"°Bienvenido!\n…ste es un puzzle \"quice\":\n"<<endl;
-				
-		//Delcaro e inicializo variables
-		int puzzle[P_MAX][P_MAX]={0};
-		
-		//GeneraciÛn del puzzle
-		format(puzzle);
-		crear(puzzle);
-		
-		//PresentaciÛn del puzzle
-		mostrar(puzzle);
-		cout <<endl;
-		
-		//Revisa si se repite
-		cout <<"øDesea generar otro? (s/n) ";
-		cin >>respuesta;
-		while(respuesta!='s'&&respuesta!='n'){
-			cout <<"ERROR: Por favor ingrese un car·cter v·lido (s/n) ";
+	//Herramientas
+	setlocale(LC_ALL, "spanish");			//Permite el uso de car√°cteres especiales.
+	srand(time(NULL));                      	//Crea una semilla aleatoria para rand().
+	//Men√∫ principal.
+	char respuesta='\0';
+	cout <<"¬°Bienvenido!\nEn este programa podr√° generar y comprobar la solubilidad de un puzzle \"quice\".\n"<<endl;
+	cout <<"1. Empezar   2. Salir\n"<<endl;
+	do{
+		cout <<"Respuesta: ";
+		cin >>respuesta;                	//Si el usuario ingresa 1, imprime un puzzle.
+		if(respuesta!='1'&respuesta!='2')       //Si elige 2, salta a la l√≠nea 66.
+			cout <<"ERROR: El n√∫mero ingresado no es correcto.\n";
+	}while(respuesta!='1'&respuesta!='2');      	//Si ingresa otro n√∫mero devuelve error y lo intenta de nuevo.
+	if(respuesta=='1')							
+		respuesta='s';				//Remplaza el 1 con una s para iniciar el bucle.
+	//Impresi√≥n del puzzle.
+	while(respuesta=='s'){                      	//Mientras respuesta sea s,
+		clear();                                //Limpia la pantalla
+		int puzzle[N][N]={0};                   //Crea una variable para el puzzle.
+		crear(puzzle);                          //Crea una permutaci√≥n para el puzzle.
+		cout <<endl;                            //Imprime una margen.
+		mostrar(puzzle);                        //Imprime el puzzle.
+		//Solubilidad.
+		cout <<endl<<"Este puzzle es ";         //Imprime si el puzzle es
+		if(impos(puzzle))
+            cout <<"insoluble."<<endl;          	//insoluble
+		else
+            cout <<"soluble."<<endl;			//o soluble.
+		//¬øRepetir?
+		cout <<endl<<"¬øDesea intentarlo de nuevo? (s/n) ";
+		cin >>respuesta;			//Si el usuario ingresa algo diferente a s o n,
+		while(respuesta!='s'&&respuesta!='n'){	//devuelve error, y lo intenta de nuevo.
+			cout <<"ERROR: Por favor ingrese un car√°cter v√°lido (s/n) ";
 			cin >>respuesta;
 		}
-		cout <<endl;
 	}
-	cout <<"°Gracias por utilizar este programa! Presione una tecla para salir. ";
+	//Salida del programa.
+	cout <<endl;
+	cout <<"¬°Gracias por utilizar este programa! Presione una tecla para salir. ";
 	cin.get();
-	cin.ignore();
-	
-	return 0;
+	cin.ignore();                               	//Limpia el buffer.
+	return 0;                                   	//Termina el programa.
 }
-
-void format(int puzzle[][P_MAX]){
-	for(int i=0;i<P_MAX;i++)				  //Se ejecuta para cada elemento de la matriz
-		for(int j=0;j<P_MAX;j++)
-			puzzle[i][j]=0;					  //Asigna 0 al elemento
-}
-
-void crear(int puzzle[][P_MAX]){
-	int temp=0;
-	for(int i=0; i<P_MAX; i++)				  //Se ejecuta para cada elemento de la matriz
-		for(int j=0; j<P_MAX; j++){
-			if(i==P_MAX-1&j==P_MAX-1) break;  //No se ejecuta para el ˙ltimo elemento
-			do temp=rand()%(P_MAX*P_MAX-1)+1; //Genera un n˙mero aleatorio entre 1-15
-			while(check(temp, puzzle));		  //Si el n˙mero est· en la matriz, busca otro
-			puzzle[i][j]=temp;				  //Guarda el n˙mero en el elemento
+//---------------------------Desarrollo de funciones----------------------------
+void crear(int puzzle[][N]){//--------------------------------------------------
+	format(puzzle);                     		//Asigna -1 a toda la matriz.
+	int temp=0;                         		//Crea una variable temporal para los n√∫meros.
+	for(int i=0; i<N; i++)			    	//Se repite para cada fila de la matriz.	  
+		for(int j=0; j<N; j++){         	//Se repite para cada elemento de la fila.
+			do
+				temp=rand()%(N*N);      //Crea un n√∫mero aleatorio entre 0 y (N^2)-1.
+			while(check(temp, puzzle));	//Hasta encontrar uno que no est√© en la matriz.
+			puzzle[i][j]=temp;		//Y lo asigna al elemento.
 		}
 }
 
-bool check(int temp, int puzzle[][P_MAX]){
-	bool repetido=0;
-	for(int i=0; i<P_MAX; i++)				   //Se ejecuta para cada elemento de la matriz
-		for(int j=0; j<P_MAX; j++){
-			if(temp==puzzle[i][j]) repetido=1; //Compara temp con el elemento
-		}
-	return repetido;
+void format(int puzzle[][N]){//-------------------------------------------------
+	for(int i=0;i<N;i++)		        	//Se repite para cada fila de la matriz.
+		for(int j=0;j<N;j++)            	//Se repite para cada elemento de la fila.
+			puzzle[i][j]=-1;            	//Asigna -1 al elemento.
 }
 
-void mostrar(int puzzle[][P_MAX]){
-	for(int i=0;i<P_MAX;i++){
-		cout <<" ";
-		for(int j=0;j<P_MAX;j++){
-			//Si el elemento es 0, muestra tres espacios
-			if(puzzle[i][j]==0) cout <<"   ";
-			//Si el elemento es menor a 9 pone un espacio antes
-			else cout <<(puzzle[i][j]>9?"\0":" ")<<puzzle[i][j]<<" ";
+bool check(int temp, int puzzle[][N]){//----------------------------------------
+	for(int i=0; i<N; i++)			    	//Se repite para cada fila de la matriz.
+		for(int j=0; j<N; j++)          	//Se repite para cada elemento de la fila.
+			if(temp==puzzle[i][j])      	//Si el elemento es igual a temp,
+				return 1;               //Regresa 1.
+	return 0;                           		//Si no encuentra temp, regresa 0.
+}
+
+bool impos(int puzzle[][N]){//--------------------------------------------------
+	int inver=sacaInver(puzzle);            	//Cuenta cu√°ntas inversiones hay en el puzzle.
+	if(N%2==1&inver%2==0)                   	//Si el puzzle es de orden impar,
+		return 0;                           	//y las inversiones son par, regresa 0.
+	if(N%2==0){                             	//Si el puzzle es de orden par,
+		if(ceroEnI(puzzle)%2==1&inver%2==0) 	//el 0 est√° en en una fila inpar,
+			return 0;                       //y las inversiones son par, regresa 0.
+		if(ceroEnI(puzzle)%2==0&inver%2==1) 	//el 0 est√° en una fila par,
+			return 0;                       //y las inversiones son impar, regresa 0.
+	}
+	return 1;                               	//Si no, regresa 1.
+}
+
+int sacaInver(int puzzle[][N]){//-----------------------------------------------
+    int inver=0;
+    for(int i1=0; i1<N; i1++)                               //Se repite para cada fila de la matriz.
+        for(int j1=0; j1<N; j1++)                           //Se repite para cada elemento de la fila.
+            for(int i2=i1; i2<N; i2++)                      //Se repite para cada fila mayor o igual a la fila 1.
+                for(int j2=(i1==i2?j1+1:0); j2<N; j2++){    //Se repite para cada elemento despu√©s del elemento 1.
+                    if(puzzle[i1][j1]==0|puzzle[i2][j2]==0) //Si alguno de los dos elementos es 0,
+                        continue;                           //Lo salta.
+                    if(puzzle[i1][j1]>puzzle[i2][j2])       //Si el elemento 1 es mayor al elemento 2,
+                        inver++;                            //Aumenta el contador de inversiones en 1.
+                }                               
+    return inver;                                           //Regresa el conteo de inversiones.
+}
+
+int ceroEnI(int puzzle[][N]){//-------------------------------------------------
+	for(int i=0; i<N; i++)              		//Se repite para cada fila de la matriz.
+		for(int j=0; j<N; j++)          	//Se repite para cada elemento de la fila.
+			if(puzzle[i][j]==0)         	//Si encuentra 0,
+				return i;		//regresa la fila en la que lo encontr√≥.
+}
+
+void mostrar(int puzzle[][N]){//------------------------------------------------
+	for(int i=0;i<N;i++){               		//Se repite para cada fila de la matriz.
+		cout <<" ";                     	//Imprime una sangr√≠a.
+		for(int j=0;j<N;j++){           	//Se repite para cada elemento de la fila.
+            if(puzzle[i][j]<10)         		//Si el elemento tiene s√≥lo un d√≠gito,
+                cout <<" ";             		//Imprime un espacio para tabular.
+            if(puzzle[i][j]>0)          		//Si el elemento es mayor a 0,
+                cout <<puzzle[i][j];    		//Imprime el elemento.
+            else                        		//Si no,
+                cout <<" ";             		//Imprime un espacio.
+            cout <<" ";                 		//Imprime un espacio para el siguiente elemento.
 		}
-		cout <<endl;
+		cout <<endl;                    	//Salto de l√≠nea para la siguiente fila.
 	}
 }
