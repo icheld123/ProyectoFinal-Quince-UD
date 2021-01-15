@@ -1,7 +1,7 @@
 /*
-Autor:    Nicol√°s David Sabogal Vel√°squez
-Programa: Algoritmo Posibilidad Puzzle Quince
-Fecha:    07/01/2021
+Autor:    Ichel Delgado Morales
+Programa: Algoritmo movimiento puzzle quince
+Fecha:    14/01/2021
 */
 
 //---------------------------------Librer√≠as------------------------------------
@@ -32,7 +32,7 @@ int main(){
 	srand(time(NULL));                      	//Crea una semilla aleatoria para rand().
 	//Men√∫ principal.
 	char respuesta='\0';
-	cout <<"¬°Bienvenido!\nEn este programa podr√° generar y comprobar la solubilidad de un puzzle \"quice\".\n"<<endl;
+	cout <<"°Bienvenido!\nEn este programa podr· generar y comprobar la solubilidad de un puzzle \"quince\".\n"<<endl;
 	cout <<"1. Empezar   2. Salir\n"<<endl;
 	do{
 		cout <<"Respuesta: ";
@@ -53,8 +53,85 @@ int main(){
 		cout <<endl<<"Este puzzle es ";         //Imprime si el puzzle es
 		if(impos(puzzle))
             cout <<"insoluble."<<endl;          	//insoluble
-		else
-            cout <<"soluble."<<endl;			//o soluble.
+		else{
+			cout <<"soluble."<<endl<<endl;			//o soluble.
+			cout<<"øDesea resolver el puzzle? (s/n): ";
+			cin>>respuesta;
+			
+			while(respuesta!='s'&&respuesta!='n'){	//devuelve error, y lo intenta de nuevo.
+				cout <<"ERROR: Por favor ingrese un car·cter v·lido (s/n) ";
+				cin >>respuesta;
+			}
+			
+			if(respuesta=='s'){
+				char tecla='\0';
+				int contador=0;
+				
+				//cout<<endl<<"Siguiente movimiento (w/a/s/d) ";
+				
+				while(1){
+					
+					clear();
+					cout<<endl;
+					mostrar(puzzle);
+					
+					cout<<endl<<"Movimientos realizados: "<<contador<<endl;
+					cout<<endl<<"Arriba: w    Izquierda: a    Abajo: s    Derecha: d "<<endl;
+					cout<<endl<<"Siguiente movimiento: ";
+					cin>>tecla;
+					
+					int blankPosX=0, blankPosY=0;
+					
+					for (int i=0; i<N; i++){
+						for(int j=0; j<N; j++){
+							if(puzzle[i][j]==0){
+								blankPosX=j;
+								blankPosY=i;
+							}
+						}
+					}
+					switch(tecla){
+						case 'w':	//mueve hacia arriba
+							if(blankPosY<N-1){
+								puzzle[blankPosY][blankPosX]=puzzle[blankPosY+1][blankPosX];
+								puzzle[blankPosY+1][blankPosX]=0;
+								blankPosY=blankPosY+1;
+								contador++;
+							}
+						break;
+						case 'a':	//mueve izquierda
+							if(blankPosX<N-1){
+								puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX+1];
+								puzzle[blankPosY][blankPosX+1]=0;
+								blankPosX=blankPosX+1;
+								contador++;
+							}
+
+						break;
+						case 's':	//mueve abajo
+							if(blankPosY>0){
+								puzzle[blankPosY][blankPosX]=puzzle[blankPosY-1][blankPosX];
+								puzzle[blankPosY-1][blankPosX]=0;
+								blankPosY=blankPosY-1;
+								contador++;
+							}
+						break;
+						case 'd':	//mueve derecha
+							if(blankPosX>0){
+								puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX-1];
+								puzzle[blankPosY][blankPosX-1]=0;
+								blankPosX=blankPosX-1;
+								contador++;					
+							}
+						break;
+						default:
+							printf("Tecla incorrecta.");
+						break;
+					}
+				}
+			}
+		}
+            
 		//¬øRepetir?
 		cout <<endl<<"¬øDesea intentarlo de nuevo? (s/n) ";
 		cin >>respuesta;			//Si el usuario ingresa algo diferente a s o n,
