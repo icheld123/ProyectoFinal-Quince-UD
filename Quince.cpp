@@ -29,7 +29,7 @@ bool mover(int puzzle[][N], char tecla);//Mueve las fichas en el puzzle.
 using namespace std;                                //Evita escribir std:: cada vez que se refiere una librería.
 
 int main(){
-    //Herramientas
+  //Herramientas
 	setlocale(LC_ALL, "spanish");			        //Permite el uso de carácteres especiales.
 	srand(time(NULL));                              //Crea una semilla aleatoria para rand().
 	//Menú principal.
