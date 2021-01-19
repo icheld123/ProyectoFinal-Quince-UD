@@ -53,6 +53,7 @@ int main(){
 		//Solubilidad.
 		cout <<endl<<"Este puzzle es ";             //Imprime si el puzzle es
 		if(impos(puzzle))
+
             cout <<"insoluble."<<endl;              //insoluble
 		else{
 			cout <<"soluble."<<endl<<endl;	        //o soluble.
