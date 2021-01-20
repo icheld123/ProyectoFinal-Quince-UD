@@ -1,3 +1,9 @@
+/*
+Autores:  Ichel Delgado, Nicolás Rodriguez y Nicolás Sabogal
+Programa: Puzzle "Quince" Detección de Tecla
+Fecha:    20/01/2020
+*/
+
 //---------------------------------Librerías------------------------------------
 #include <iostream>                         //Imput y Output
 #include <clocale>                          //Cambio del localismo para tildes
