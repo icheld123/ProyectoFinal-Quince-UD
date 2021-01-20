@@ -1,18 +1,17 @@
-/*
-Autor:    Ichel Alejandra Delgado y Nicolás Sabogal
-Programa: Puzzle Quince Funcionamiento Básico Terminado
-Fecha:    18/01/2021
-*/
-
 //---------------------------------Librerías------------------------------------
 #include <iostream>                         //Imput y Output
 #include <clocale>                          //Cambio del localismo para tildes
 #include <cstdlib>                          //Uso de rand() y srand()
 #include <ctime>                            //Uso de time para generar la semilla
+#include <conio.h>                          //kbhit()
 
 //--------------------------------Constantes------------------------------------
 #define clear() system("CLS")	            //limpia la pantalla.
 #define N       4                           //Orden del puzzle.
+#define UP      72                          //Input de la tecla arriba.
+#define DOWN    80                          //Input de la tecla abajo.
+#define RIGTH   77                          //Input de la tecla derecha.
+#define LEFT    75                          //Input de la tecla izquierda.
 
 //-----------------------Prototipo de funciones---------------------------------
 void crear(int puzzle[][N]);		        //Genera una permutación aleatoria con números 0-N^2.
@@ -22,7 +21,8 @@ bool impos(int puzzle[][N]);                //Revisa si es posible resolver la m
 int sacaInver(int puzzle[][N]);             //Cuenta cuántas inversiones hay en la matriz.
 int ceroEnI(int puzzle[][N]);               //Identifica en que fila está el cero.
 void mostrar(int puzzle[][N]);		        //Imprime la matriz.
-bool mover(int puzzle[][N], char tecla);    //Mueve las fichas en el puzzle.
+bool moveInput(int puzzle[][N], char tecla);//Mueve las fichas en el puzzle.
+bool moveProc(int puzzle[][N], char tecla); //Mueve las fichas en el puzzle.
 bool puzzleNotSolved(int puzzle[][N]);      //Revisa si el puzzle no esta resuelto.
 
 //-----------------------------------Main---------------------------------------
@@ -71,11 +71,8 @@ int main(){
 					clear();                            //Borra la pantalla.
 					cout<<endl;                         //Imprime una línea de margen.
 					mostrar(puzzle);                    //Muestra el puzzle.
-					cout <<endl<<"Movimientos realizados: "<<contador<<endl;
-					cout <<endl<<"Arriba: w    Izquierda: a    Abajo: s    Derecha: d "<<endl;
-					cout <<endl<<"Siguiente movimiento: ";
-					cin >>tecla;                        //Pregunta al usuario en qué dirección quiere moverse.
-					if(mover(puzzle, tecla))            //Si el usuario ingresó una tecla válida,
+					cout <<endl<<"Movimientos realizados: "<<contador;
+					if(moveInput(puzzle, tecla))        //Si el usuario ingresó una tecla válida,
 					    contador++;                     //Aumenta en 1 el contador de movimientos.
 				}
 				//Terminado
@@ -96,11 +93,12 @@ int main(){
 	}
 	//Salida del programa.
 	cout <<endl;
-	cout <<"Â¡Gracias por utilizar este programa! Presione una tecla para salir. ";
+	cout <<"¡Gracias por utilizar este programa! Presione una tecla para salir. ";
 	cin.get();
 	cin.ignore();                               	    //Limpia el buffer.
 	return 0;                                   	    //Termina el programa.
 }
+
 //---------------------------Desarrollo de funciones----------------------------
 void crear(int puzzle[][N]){//--------------------------------------------------
 	format(puzzle);                     	//Asigna -1 a toda la matriz.
@@ -124,21 +122,21 @@ bool check(int puzzle[][N], int temp){//----------------------------------------
 	for(int i=0; i<N; i++)			    	//Se repite para cada fila de la matriz.
 		for(int j=0; j<N; j++)          	//Se repite para cada elemento de la fila.
 			if(temp==puzzle[i][j])      	//Si el elemento es igual a temp,
-				return 1;                   //Regresa 1.
-	return 0;                           	//Si no encuentra temp, regresa 0.
+				return 1;                   //Retorna 1.
+	return 0;                           	//Si no encuentra temp, retorna 0.
 }
 
 bool impos(int puzzle[][N]){//--------------------------------------------------
 	int inver=sacaInver(puzzle);            //Cuenta cuántas inversiones hay en el puzzle.
 	if(N%2==1&inver%2==0)                   //Si el puzzle es de orden impar,
-		return 0;                           //y las inversiones son par, regresa 0.
+		return 0;                           //y las inversiones son par, retorna 0.
 	if(N%2==0){                             //Si el puzzle es de orden par,
 		if(ceroEnI(puzzle)%2==1&inver%2==0) //el 0 está en en una fila inpar,
-			return 0;                       //y las inversiones son par, regresa 0.
+			return 0;                       //y las inversiones son par, retorna 0.
 		if(ceroEnI(puzzle)%2==0&inver%2==1) //el 0 está en una fila par,
-			return 0;                       //y las inversiones son impar, regresa 0.
+			return 0;                       //y las inversiones son impar, retorna 0.
 	}
-	return 1;                               //Si no, regresa 1.
+	return 1;                               //Si no, retorna 1.
 }
 
 int sacaInver(int puzzle[][N]){//-----------------------------------------------
@@ -152,14 +150,14 @@ int sacaInver(int puzzle[][N]){//-----------------------------------------------
                     if(puzzle[i1][j1]>puzzle[i2][j2])       //Si el elemento 1 es mayor al elemento 2,
                         inver++;                            //Aumenta el contador de inversiones en 1.
                 }                               
-    return inver;                                           //Regresa el conteo de inversiones.
+    return inver;                                           //Retorna el conteo de inversiones.
 }
 
 int ceroEnI(int puzzle[][N]){//-------------------------------------------------
 	for(int i=0; i<N; i++)              	//Se repite para cada fila de la matriz.
 		for(int j=0; j<N; j++)          	//Se repite para cada elemento de la fila.
 			if(puzzle[i][j]==0)         	//Si encuentra 0,
-				return i;	    	        //regresa la fila en la que lo encontró.
+				return i;	    	        //retorna la fila en la que lo encontró.
 }
 
 void mostrar(int puzzle[][N]){//------------------------------------------------
@@ -178,7 +176,38 @@ void mostrar(int puzzle[][N]){//------------------------------------------------
 	}
 }
 
-bool mover(int puzzle[][N], char tecla){//--------------------------------------
+bool moveInput(int puzzle[][N], char tecla){//-----------------------------------------
+	while(1){	
+        if(kbhit()){                              //Si se presiona una tecla:
+            tecla=getch();                        //Guarda la tecla presionada y                
+            switch(tecla){
+                case UP:{                         //si se presionó la flecha arriba, 
+                    if(moveProc(puzzle, 'w'))     //comprueba si es un movimiento válido, lo ejecuta en caso de serlo
+                        return 1;                 //y retorna 1.
+                    return 0;                     //Si no, retorna 0.
+                }
+                case DOWN:{                       //Si se presionó la flecha abajo
+                    if(moveProc(puzzle, 's'))     
+                        return 1;
+                    return 0;
+                }
+                case RIGTH:{                      //Si se presionó la flecha abajo
+                    if(moveProc(puzzle, 'd'))
+                        return 1;
+                    return 0;
+                }
+                case LEFT:{                       //Si se presionó la flecha abajo
+                    if(moveProc(puzzle, 'a'))
+                        return 1;
+                    return 0;
+                }
+            }
+            return 0;                             //Si no es una tecla válida, retorna 0.
+    	}
+    }
+}
+
+bool moveProc(int puzzle[][N], char tecla){//--------------------------------------
 	int blankPosX=0, blankPosY=0;           //Crea dos variables para determinar el punto de la posición sin ficha en el puzzle.
 	for (int i=0; i<N; i++)                 //Se repite para fila de la matríz.
 		for(int j=0; j<N; j++)              //Se repite para cada elemento de la fila.
@@ -194,6 +223,7 @@ bool mover(int puzzle[][N], char tecla){//--------------------------------------
 				blankPosY=blankPosY+1;                                            //Se suma una posición al campo vacío.  
 				return 1;                                                         //Si se realiza el movimiento, entonces se le suma 1 al contador en la línea 76.
 			}
+            return 0;                       //Si no, devuelve 0.
 		case 'a':	                        //Si el usuario presiona la tecla 'a' para mover hacia la izquierda
 			if(blankPosX<N-1){              //y la posición del espacio en blanco no está en el límite derecho de la matriz repite los pasos de arriba con la ficha a su derecha.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX+1];     
@@ -201,6 +231,7 @@ bool mover(int puzzle[][N], char tecla){//--------------------------------------
 				blankPosX=blankPosX+1;
 				return 1;
 			}
+            return 0;
 		case 's':	                        //Si el usuario presiona la tecla 's' para mover hacia abajo
 			if(blankPosY>0){                //y la posición del espacio en blanco no está en el límite superior de la matriz repite los pasos de arriba con la ficha sobre él.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY-1][blankPosX];
@@ -208,6 +239,7 @@ bool mover(int puzzle[][N], char tecla){//--------------------------------------
 				blankPosY=blankPosY-1;
 				return 1;
 			}
+            return 0;
 		case 'd':	                        //Si el usuario presiona la tecla 'd' para mover hacia la derecha
 			if(blankPosX>0){                //y la posición del espacio en blanco no está en el límite izquierdo de la matriz, repite los pasos de arriba con la ficha a su izquierda.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX-1];
@@ -215,9 +247,10 @@ bool mover(int puzzle[][N], char tecla){//--------------------------------------
 				blankPosX=blankPosX-1;
 				return 1;					
 			}
+            return 0;
     }
-    return 0;
 }
+
 bool puzzleNotSolved(int puzzle[][N]){//----------------------------------------
 	int a=1;                                //Crea una variable para comparar las fichas desde el 1.
 	for(int i = 0; i<N; i++)                //Se repite para cada fila de la matriz.
@@ -225,8 +258,8 @@ bool puzzleNotSolved(int puzzle[][N]){//----------------------------------------
 			if (puzzle[i][j]==a)            //Si la ficha en la posición de la matriz se corresponde con a,
 				a++;                        //aumenta a en 1.
 			else                            //Si no,
-			    return 1;                   //regresa 1.
+			    return 1;                   //retorna 1.
             if (a==N*N)                     //Si a alcanza N*N,
-                return 0;	                //Regresa 0.
+                return 0;	                //Retorna 0.
 		}
 }
