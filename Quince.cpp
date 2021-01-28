@@ -1,7 +1,7 @@
 /*
 Autores:  Ichel Delgado, Nicolás Rodriguez y Nicolás Sabogal
-Programa: Puzzle "quince" detecta tecla reducido
-Fecha:    20/01/2020
+Programa: Puzzle "quince" creación manual
+Fecha:    28/01/2020
 */
 
 //---------------------------------Librerías------------------------------------
@@ -20,6 +20,7 @@ Fecha:    20/01/2020
 #define LEFT    75                          //Input de la tecla izquierda.
 
 //-----------------------Prototipo de funciones---------------------------------
+void aMano(int puzzle[][N]);				//Permite crear manualmente la matriz.
 void crear(int puzzle[][N]);		        //Genera una permutación aleatoria con números 0-N^2.
 void format(int puzzle[][N]);		        //Asigna -1 en todos los elementos de la matriz.
 bool check(int puzzle[][N], int temp);      //Revisa si un número ya está en la matriz.
@@ -43,20 +44,32 @@ int main(){
 	cout <<"1. Empezar   2. Salir\n"<<endl;
 	do{
 		cout <<"Respuesta: ";
-		cin >>respuesta;                	            //Si el usuario ingresa 1, imprime un puzzle.
-		if(respuesta!='1'&respuesta!='2')               //Si elige 2, salta a la línea 66.
+		cin >>respuesta;                	            //Si el usuario ingresa 1, lo lleva al creador de puzzles.
+		if(respuesta!='1'&respuesta!='2')               //Si elige 2, salta a la línea 116.
 			cout <<"ERROR: El número ingresado no es correcto.\n";
 	}while(respuesta!='1'&respuesta!='2');              //Si ingresa otro número devuelve error y lo intenta de nuevo.
 	if(respuesta=='1')							
 		respuesta='s';                                  //Remplaza el 1 con una s para iniciar el bucle.
 	//Impresión del puzzle.
 	while(respuesta=='s'){                              //Mientras respuesta sea s,
-		clear();                                        //Limpia la pantalla
+		//Creación
 		int puzzle[N][N]={0};                           //Crea una variable para el puzzle.
-		crear(puzzle);                                  //Crea una permutación para el puzzle.
+		cout <<endl<<"¿Cómo desea crear el puzzle?\n"<<endl;
+		cout <<"1. Atumáticamente   2. Manualmente\n"<<endl;
+		do{
+			cout <<"Respuesta: ";
+			cin >>respuesta;                	        //Si el usuario ingresa 1, crea una permutación para el puzzle..
+			if(respuesta!='1'&respuesta!='2')           //Si elige 2, crea manualmente el puzzle.
+				cout <<"ERROR: El número ingresado no es correcto.\n";
+		}while(respuesta!='1'&respuesta!='2');          //Si ingresa otro número devuelve error y lo intenta de nuevo.
+		if(respuesta=='1')
+			crear(puzzle);
+		else
+			aMano(puzzle);            					                  
+		clear();                                        //Limpia la pantalla
+		//Solubilidad.		
 		cout <<endl;                                    //Imprime una margen.
 		mostrar(puzzle);                                //Imprime el puzzle.
-		//Solubilidad.
 		cout <<endl<<"Este puzzle es ";                 //Imprime si el puzzle es
 		if(impos(puzzle))
             cout <<"insoluble."<<endl;                  //insoluble
@@ -108,6 +121,33 @@ int main(){
 }
 
 //---------------------------Desarrollo de funciones----------------------------
+void aMano(int puzzle[][N]){//------------------------------------------------
+	format(puzzle);							//Llena la matríz con -1.
+	for(int i=0; i<N; i++)					//Se repite para todas las filas.
+		for(int j=0; j<N; j++){				//Se repite para cada elemento de la fila.
+			int error=0;					//Crea una variable para los errores.
+			do{
+				clear();					//Limpia la pantalla.
+				cout <<"\tCREACIÓN MANUAL DEL PUZZLE\n"<<endl;
+				mostrar(puzzle);			//Muestra el puzzle como está.
+				int num=0;					//Crea una variable para la entrada.
+				if(error==1)				//Si la entrada está fuera del rango muestra el error.
+					cout <<endl<<"ERROR: Sólo son válidos números entre 0 y "<<N*N-1<<".\n";
+				if(error==2)				//Si la entrada ya está en la matriz muestra el error.
+					cout <<endl<<"ERROR: El número ingresado ya está en el puzzle.\n";
+				cout <<endl<<"Ingrese el número que ocupará la posición ("<<j+1<<", "<<N-i<<"): ";
+				cin >>num;					//Recibe la entrada.
+				error=0;					//Reinicia el identificador de error.
+				if(num<0|num>N*N-1)
+					error=1;				//Si la entrada está fuera del rango asigna el código 1.
+				if(check(puzzle, num))
+					error=2;				//Si la entrada ya está en la matriz asigna el código 2.
+				if(error==0)
+					puzzle[i][j]=num;		//Si no se identificó un error, guarda la entrada.
+			}while(error!=0);				//Si no se identificó un error, prosigue al siguiente.
+		}
+}
+
 void crear(int puzzle[][N]){//--------------------------------------------------
 	format(puzzle);                     	//Asigna -1 a toda la matriz.
 	int temp=0;                         	//Crea una variable temporal para los números.
