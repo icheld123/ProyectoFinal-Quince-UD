@@ -1,7 +1,7 @@
 /*
 Autores:  Ichel Delgado, Nicolás Rodriguez y Nicolás Sabogal
-Programa: Puzzle "Quince" Detección de Tecla
-Fecha:    20/01/2020
+Programa: Puzzle "quince" creación manual
+Fecha:    28/01/2020
 */
 
 //---------------------------------Librerías------------------------------------
@@ -16,10 +16,11 @@ Fecha:    20/01/2020
 #define N       4                           //Orden del puzzle.
 #define UP      72                          //Input de la tecla arriba.
 #define DOWN    80                          //Input de la tecla abajo.
-#define RIGTH   77                          //Input de la tecla derecha.
+#define RIGHT   77                          //Input de la tecla derecha.
 #define LEFT    75                          //Input de la tecla izquierda.
 
 //-----------------------Prototipo de funciones---------------------------------
+void aMano(int puzzle[][N]);				//Permite crear manualmente la matriz.
 void crear(int puzzle[][N]);		        //Genera una permutación aleatoria con números 0-N^2.
 void format(int puzzle[][N]);		        //Asigna -1 en todos los elementos de la matriz.
 bool check(int puzzle[][N], int temp);      //Revisa si un número ya está en la matriz.
@@ -27,8 +28,7 @@ bool impos(int puzzle[][N]);                //Revisa si es posible resolver la m
 int sacaInver(int puzzle[][N]);             //Cuenta cuántas inversiones hay en la matriz.
 int ceroEnI(int puzzle[][N]);               //Identifica en que fila está el cero.
 void mostrar(int puzzle[][N]);		        //Imprime la matriz.
-bool moveInput(int puzzle[][N], char tecla);//Mueve las fichas en el puzzle.
-bool moveProc(int puzzle[][N], char tecla); //Mueve las fichas en el puzzle.
+bool mover(int puzzle[][N], char tecla);	//Mueve las fichas en el puzzle.
 bool puzzleNotSolved(int puzzle[][N]);      //Revisa si el puzzle no esta resuelto.
 
 //-----------------------------------Main---------------------------------------
@@ -44,20 +44,32 @@ int main(){
 	cout <<"1. Empezar   2. Salir\n"<<endl;
 	do{
 		cout <<"Respuesta: ";
-		cin >>respuesta;                	            //Si el usuario ingresa 1, imprime un puzzle.
-		if(respuesta!='1'&respuesta!='2')               //Si elige 2, salta a la línea 66.
+		cin >>respuesta;                	            //Si el usuario ingresa 1, lo lleva al creador de puzzles.
+		if(respuesta!='1'&respuesta!='2')               //Si elige 2, salta a la línea 116.
 			cout <<"ERROR: El número ingresado no es correcto.\n";
 	}while(respuesta!='1'&respuesta!='2');              //Si ingresa otro número devuelve error y lo intenta de nuevo.
 	if(respuesta=='1')							
 		respuesta='s';                                  //Remplaza el 1 con una s para iniciar el bucle.
 	//Impresión del puzzle.
 	while(respuesta=='s'){                              //Mientras respuesta sea s,
-		clear();                                        //Limpia la pantalla
+		//Creación
 		int puzzle[N][N]={0};                           //Crea una variable para el puzzle.
-		crear(puzzle);                                  //Crea una permutación para el puzzle.
+		cout <<endl<<"¿Cómo desea crear el puzzle?\n"<<endl;
+		cout <<"1. Atumáticamente   2. Manualmente\n"<<endl;
+		do{
+			cout <<"Respuesta: ";
+			cin >>respuesta;                	        //Si el usuario ingresa 1, crea una permutación para el puzzle..
+			if(respuesta!='1'&respuesta!='2')           //Si elige 2, crea manualmente el puzzle.
+				cout <<"ERROR: El número ingresado no es correcto.\n";
+		}while(respuesta!='1'&respuesta!='2');          //Si ingresa otro número devuelve error y lo intenta de nuevo.
+		if(respuesta=='1')
+			crear(puzzle);
+		else
+			aMano(puzzle);            					                  
+		clear();                                        //Limpia la pantalla
+		//Solubilidad.		
 		cout <<endl;                                    //Imprime una margen.
 		mostrar(puzzle);                                //Imprime el puzzle.
-		//Solubilidad.
 		cout <<endl<<"Este puzzle es ";                 //Imprime si el puzzle es
 		if(impos(puzzle))
             cout <<"insoluble."<<endl;                  //insoluble
@@ -78,8 +90,11 @@ int main(){
 					cout<<endl;                         //Imprime una línea de margen.
 					mostrar(puzzle);                    //Muestra el puzzle.
 					cout <<endl<<"Movimientos realizados: "<<contador;
-					if(moveInput(puzzle, tecla))        //Si el usuario ingresó una tecla válida,
-					    contador++;                     //Aumenta en 1 el contador de movimientos.
+					tecla=getch();
+					if(mover(puzzle, tecla)==0)         //Si el usuario no ingresó una tecla válida,
+					    continue;                       //Reinicia el ciclo.
+					else                                //Si es válido,
+						contador++;                     //aumenta en 1 el contador de movimientos.
 				}
 				//Terminado
                 clear();                                //Borra la pantalla
@@ -106,6 +121,33 @@ int main(){
 }
 
 //---------------------------Desarrollo de funciones----------------------------
+void aMano(int puzzle[][N]){//------------------------------------------------
+	format(puzzle);							//Llena la matríz con -1.
+	for(int i=0; i<N; i++)					//Se repite para todas las filas.
+		for(int j=0; j<N; j++){				//Se repite para cada elemento de la fila.
+			int error=0;					//Crea una variable para los errores.
+			do{
+				clear();					//Limpia la pantalla.
+				cout <<"\tCREACIÓN MANUAL DEL PUZZLE\n"<<endl;
+				mostrar(puzzle);			//Muestra el puzzle como está.
+				int num=0;					//Crea una variable para la entrada.
+				if(error==1)				//Si la entrada está fuera del rango muestra el error.
+					cout <<endl<<"ERROR: Sólo son válidos números entre 0 y "<<N*N-1<<".\n";
+				if(error==2)				//Si la entrada ya está en la matriz muestra el error.
+					cout <<endl<<"ERROR: El número ingresado ya está en el puzzle.\n";
+				cout <<endl<<"Ingrese el número que ocupará la posición ("<<j+1<<", "<<N-i<<"): ";
+				cin >>num;					//Recibe la entrada.
+				error=0;					//Reinicia el identificador de error.
+				if(num<0|num>N*N-1)
+					error=1;				//Si la entrada está fuera del rango asigna el código 1.
+				if(check(puzzle, num))
+					error=2;				//Si la entrada ya está en la matriz asigna el código 2.
+				if(error==0)
+					puzzle[i][j]=num;		//Si no se identificó un error, guarda la entrada.
+			}while(error!=0);				//Si no se identificó un error, prosigue al siguiente.
+		}
+}
+
 void crear(int puzzle[][N]){//--------------------------------------------------
 	format(puzzle);                     	//Asigna -1 a toda la matriz.
 	int temp=0;                         	//Crea una variable temporal para los números.
@@ -182,38 +224,7 @@ void mostrar(int puzzle[][N]){//------------------------------------------------
 	}
 }
 
-bool moveInput(int puzzle[][N], char tecla){//-----------------------------------------
-	while(1){	
-        if(kbhit()){                              //Si se presiona una tecla:
-            tecla=getch();                        //Guarda la tecla presionada y                
-            switch(tecla){
-                case UP:{                         //si se presionó la flecha arriba, 
-                    if(moveProc(puzzle, 'w'))     //comprueba si es un movimiento válido, lo ejecuta en caso de serlo
-                        return 1;                 //y retorna 1.
-                    return 0;                     //Si no, retorna 0.
-                }
-                case DOWN:{                       //Si se presionó la flecha abajo
-                    if(moveProc(puzzle, 's'))     
-                        return 1;
-                    return 0;
-                }
-                case RIGTH:{                      //Si se presionó la flecha abajo
-                    if(moveProc(puzzle, 'd'))
-                        return 1;
-                    return 0;
-                }
-                case LEFT:{                       //Si se presionó la flecha abajo
-                    if(moveProc(puzzle, 'a'))
-                        return 1;
-                    return 0;
-                }
-            }
-            return 0;                             //Si no es una tecla válida, retorna 0.
-    	}
-    }
-}
-
-bool moveProc(int puzzle[][N], char tecla){//--------------------------------------
+bool mover(int puzzle[][N], char tecla){//--------------------------------------
 	int blankPosX=0, blankPosY=0;           //Crea dos variables para determinar el punto de la posición sin ficha en el puzzle.
 	for (int i=0; i<N; i++)                 //Se repite para fila de la matríz.
 		for(int j=0; j<N; j++)              //Se repite para cada elemento de la fila.
@@ -222,7 +233,7 @@ bool moveProc(int puzzle[][N], char tecla){//-----------------------------------
 				blankPosY=i;                //y se le asigna el valor de i a blankPosY.
 			}
 	switch(tecla){
-        case 'w':	                        //Si el usuario presiona la tecla 'w' para mover hacia arriba
+        case UP:	                        //Si el usuario presiona la tecla 'w' para mover hacia arriba
 			if(blankPosY<N-1){              //y la posición del espacio en blanco no está en el límite inferior de la matriz,
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY+1][blankPosX];      //Entonces se revisa que haya una ficha abajo del campo vacío, se mueve una posición hacia arriba
 				puzzle[blankPosY+1][blankPosX]=0;                                 //Y se le asigna el valor 0.
@@ -230,7 +241,7 @@ bool moveProc(int puzzle[][N], char tecla){//-----------------------------------
 				return 1;                                                         //Si se realiza el movimiento, entonces se le suma 1 al contador en la línea 76.
 			}
             return 0;                       //Si no, devuelve 0.
-		case 'a':	                        //Si el usuario presiona la tecla 'a' para mover hacia la izquierda
+		case LEFT:	                        //Si el usuario presiona la tecla 'a' para mover hacia la izquierda
 			if(blankPosX<N-1){              //y la posición del espacio en blanco no está en el límite derecho de la matriz repite los pasos de arriba con la ficha a su derecha.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX+1];     
 				puzzle[blankPosY][blankPosX+1]=0;
@@ -238,7 +249,7 @@ bool moveProc(int puzzle[][N], char tecla){//-----------------------------------
 				return 1;
 			}
             return 0;
-		case 's':	                        //Si el usuario presiona la tecla 's' para mover hacia abajo
+		case DOWN:	                        //Si el usuario presiona la tecla 's' para mover hacia abajo
 			if(blankPosY>0){                //y la posición del espacio en blanco no está en el límite superior de la matriz repite los pasos de arriba con la ficha sobre él.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY-1][blankPosX];
 				puzzle[blankPosY-1][blankPosX]=0;
@@ -246,7 +257,7 @@ bool moveProc(int puzzle[][N], char tecla){//-----------------------------------
 				return 1;
 			}
             return 0;
-		case 'd':	                        //Si el usuario presiona la tecla 'd' para mover hacia la derecha
+		case RIGHT:	                        //Si el usuario presiona la tecla 'd' para mover hacia la derecha
 			if(blankPosX>0){                //y la posición del espacio en blanco no está en el límite izquierdo de la matriz, repite los pasos de arriba con la ficha a su izquierda.
 				puzzle[blankPosY][blankPosX]=puzzle[blankPosY][blankPosX-1];
 				puzzle[blankPosY][blankPosX-1]=0;
